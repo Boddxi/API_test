@@ -1,4 +1,5 @@
 import requests
+import time
 
 
 def get_session_token():
@@ -396,3 +397,122 @@ def test_case_8():
     assert all(part.isdigit() for part in time_part), f"Время должно содержать только цифры: {time_part}"
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
+
+# Тест-кейс 9: Попытка создания избранного места без указания сессионного токена
+def test_case_9():
+    data = {
+        "title": "Без токена",
+        "lat": 44.49381,
+        "lon": 11.33875
+    }
+    headers = {}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 401, f"Ожидался статус 401, но получили {response.status_code}"
+
+# Тест-кейс 10: Попытка создания избранного места с токеном, у которого истек срок «годности»
+def test_case_10():
+    token = get_session_token()
+    time.sleep(2.6)
+    data = {
+        "title": "Истек срок годности токена",
+        "lat": 44.49381,
+        "lon": 11.33875
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 401, f"Ожидался статус 401, но получили {response.status_code}"
+
+# Тест-кейс 11: Попытка создания избранного места без указания обязательного поля title
+def test_case_11():
+    token = get_session_token()
+    data = {
+        "lat": 43.77925,
+        "lon": 11.24626
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+
+# Тест-кейс 12: Попытка создания избранного места без указания обязательного поля lat и/или lon
+def test_case_12():
+    token = get_session_token()
+    data = {
+        "title": "Не заполнены все обязательные поля"
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+
+# Тест-кейс 13: Попытка создания избранного места с пустым title
+def test_case_13():
+    token = get_session_token()
+    data = {
+        "title": "",
+        "lat": 43.77925,
+        "lon": 11.24626
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+
+# Тест-кейс 14: Попытка создания избранного места с недопустимым цветом
+def test_case_14():
+    token = get_session_token()
+    data = {
+        "title": "",
+        "lat": 43.77925,
+        "lon": 11.24626,
+        "color": "INVALID_COLOR"
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+
+# Тест-кейс 15: Попытка создания избранного места с title длиной 1000 символов
+def test_case_15():
+    token = get_session_token()
+    string_1000 = "Q" * 200 + "w" * 200 + "У" * 200 + "к" * 100 + "." * 100 + "," * 199 + "7"
+    data = {
+        "title": string_1000,
+        "lat": 43.77925,
+        "lon": 11.24626,
+        "color": "INVALID_COLOR"
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+
+# Тест-кейс 16: Попытка получения сессионного токена при отправке непустого тела запроса
+def test_case_16():
+    data = {"test":"test"}
+    response = requests.post('https://regions-test.2gis.com/v1/auth/tokens',data=data)
+    token = response.cookies.get('token')
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"

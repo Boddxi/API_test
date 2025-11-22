@@ -519,7 +519,7 @@ def test_case_14():
 # Тест-кейс 15: Попытка создания избранного места с title длиной 1000 символов
 def test_case_15():
     token = get_session_token()
-    string_1000 = "Q" * 200 + "w" * 200 + "У" * 200 + "к" * 100 + "." * 100 + "," * 199 + "7"
+    string_1000 = "Q" * 200 + "w" * 200 + "У" * 200 + "к" * 100 + "." * 100 + "," * 100 + "1" * 100
     data = {
         "title": string_1000,
         "lat": 43.77925,
@@ -561,7 +561,7 @@ def test_case_17():
         data=data,
         headers=headers
     )
-    print(response.json())
+
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
     assert 'error' in response.json()
 
@@ -581,6 +581,6 @@ def test_case_18():
         data=data,
         headers=headers
     )
-    print(response.json())
+
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
     assert response.json()['error']['message'] == "Параметр 'lon' должен быть числом"

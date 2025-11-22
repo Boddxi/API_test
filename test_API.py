@@ -416,7 +416,7 @@ def test_case_9():
 # Тест-кейс 10: Попытка создания избранного места с токеном, у которого истек срок «годности»
 def test_case_10():
     token = get_session_token()
-    time.sleep(2.6)
+    time.sleep(2.1)
     data = {
         "title": "Истек срок годности токена",
         "lat": 44.49381,
@@ -515,4 +515,21 @@ def test_case_16():
     data = {"test":"test"}
     response = requests.post('https://regions-test.2gis.com/v1/auth/tokens',data=data)
     token = response.cookies.get('token')
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+
+# Тест-кейс 17: Попытка создания избранного места с lat и/или lon заполнеными некорректными типами данных
+def test_case_17():
+    token = get_session_token()
+
+    data = {
+        "title": "Тестовое место",
+        "lat": "41.89193",
+        "lon": "12.51133"
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"

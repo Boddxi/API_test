@@ -115,6 +115,7 @@ def test_case_2():
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
 
+
 # Тест-кейс 3: Создание избранного места с минимальной длиной названия
 def test_case_3():
     token = get_session_token()
@@ -168,9 +169,10 @@ def test_case_3():
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
 
+
 # Тест-кейс 4: Создание избранного места с максимальной длиной названия (999 символов)
 def test_case_4():
-    long_string = "Q"*200 + "w"*200 + "У"*200 + "к"*100 + "."*100 + ","*198 + "7"
+    long_string = "Q" * 200 + "w" * 200 + "У" * 200 + "к" * 100 + "." * 100 + "," * 198 + "7"
     token = get_session_token()
 
     data = {
@@ -222,6 +224,7 @@ def test_case_4():
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
 
+
 # Тест-кейс 5: Попытка создания избранного места сo спецсимволами в названии
 def test_case_5():
     token = get_session_token()
@@ -239,6 +242,7 @@ def test_case_5():
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
     assert 'error' in response.json()
+
 
 # Тест-кейс 6: Создание избранного места с граничными значениями координат
 def test_case_6():
@@ -293,6 +297,7 @@ def test_case_6():
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
 
+
 # Тест-кейс 7: Создание избранного места с отрицательными координатами
 def test_case_7():
     token = get_session_token()
@@ -345,6 +350,7 @@ def test_case_7():
     assert all(part.isdigit() for part in time_part), f"Время должно содержать только цифры: {time_part}"
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
+
 
 # Тест-кейс 8: Создание избранного места с нулевыми координатами
 def test_case_8():
@@ -399,6 +405,7 @@ def test_case_8():
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
 
+
 # Тест-кейс 9: Попытка создания избранного места без указания сессионного токена
 def test_case_9():
     data = {
@@ -416,12 +423,12 @@ def test_case_9():
     assert response.json()['error']['message'] == "Параметр 'token' является обязательным"
 
 
-# Тест-кейс 10: Попытка создания избранного места с токеном, у которого истек срок «годности»
+# Тест-кейс 10: Попытка создания избранного места с недействительным токеном
 def test_case_10():
     token = get_session_token()
     time.sleep(2.1)
     data = {
-        "title": "Истек срок годности токена",
+        "title": "Токен недействителен",
         "lat": 44.49381,
         "lon": 11.33875
     }
@@ -452,12 +459,12 @@ def test_case_11():
     assert 'error' in response.json()
     assert response.json()['error']['message'] == "Параметр 'title' является обязательным"
 
+
 # Тест-кейс 12: Попытка создания избранного места без указания обязательного поля lat и/или lon
 def test_case_12():
     token = get_session_token()
     data = {
-        "title": "Не заполнены все обязательные поля",
-        "lat": 11.24626
+        "title": "Не заполнены все обязательные поля"
     }
     headers = {'Cookie': f'token={token}'}
     response = requests.post(
@@ -466,7 +473,8 @@ def test_case_12():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
-    assert response.json()['error']['message'] == "Параметр 'lon' является обязательным"
+    assert response.json()['error']['message'] == "Параметры 'lat' и 'lon' является обязательными"
+
 
 # Тест-кейс 13: Попытка создания избранного места с пустым title
 def test_case_13():
@@ -485,6 +493,7 @@ def test_case_13():
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
     assert response.json()['error']['message'] == "Параметр 'title' не может быть пустым"
 
+
 # Тест-кейс 14: Попытка создания избранного места с недопустимым цветом
 def test_case_14():
     token = get_session_token()
@@ -501,7 +510,9 @@ def test_case_14():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
-    assert response.json()['error']['message'] == "Параметр 'color' может быть одним из следующих значений: BLUE, GREEN, RED, YELLOW"
+    assert response.json()['error'][
+               'message'] == "Параметр 'color' может быть одним из следующих значений: BLUE, GREEN, RED, YELLOW"
+
 
 # Тест-кейс 15: Попытка создания избранного места с title длиной 1000 символов
 def test_case_15():
@@ -525,11 +536,15 @@ def test_case_15():
 
 # Тест-кейс 16: Попытка получения сессионного токена при отправке непустого тела запроса
 def test_case_16():
-    data = {"test":"test"}
-    response = requests.post('https://regions-test.2gis.com/v1/auth/tokens',data=data)
+    data = {"test": "test"}
+    response = requests.post('https://regions-test.2gis.com/v1/auth/tokens', data=data)
     token = response.cookies.get('token')
+    print(f"Полученный токен: {token}")
+    print(f"Статус код: {response.status_code}")
+    print(f"Заголовки ответа: {dict(response.headers)}")
 
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert token is None, f"Токен не должен выдаваться, но получен: {token}"
 
 
 # Тест-кейс 17: Попытка создания избранного места с lat и/или lon заполнеными некорректными типами данных (передаем не float, а float в виде строки)
@@ -550,6 +565,7 @@ def test_case_17():
     print(response.json())
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
     assert 'error' in response.json()
+
 
 # Тест-кейс 18: Попытка создания избранного места с lat и/или lon заполненными некорректными типами данных (передаем строки)
 def test_case_18():

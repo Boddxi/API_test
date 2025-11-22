@@ -238,6 +238,7 @@ def test_case_5():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert 'error' in response.json()
 
 # Тест-кейс 6: Создание избранного места с граничными значениями координат
 def test_case_6():
@@ -412,6 +413,8 @@ def test_case_9():
         headers=headers
     )
     assert response.status_code == 401, f"Ожидался статус 401, но получили {response.status_code}"
+    assert response.json()['error']['message'] == "Параметр 'token' является обязательным"
+
 
 # Тест-кейс 10: Попытка создания избранного места с токеном, у которого истек срок «годности»
 def test_case_10():
@@ -429,6 +432,8 @@ def test_case_10():
         headers=headers
     )
     assert response.status_code == 401, f"Ожидался статус 401, но получили {response.status_code}"
+    assert 'error' in response.json()
+
 
 # Тест-кейс 11: Попытка создания избранного места без указания обязательного поля title
 def test_case_11():
@@ -444,12 +449,15 @@ def test_case_11():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert 'error' in response.json()
+    assert response.json()['error']['message'] == "Параметр 'title' является обязательным"
 
 # Тест-кейс 12: Попытка создания избранного места без указания обязательного поля lat и/или lon
 def test_case_12():
     token = get_session_token()
     data = {
-        "title": "Не заполнены все обязательные поля"
+        "title": "Не заполнены все обязательные поля",
+        "lat": 11.24626
     }
     headers = {'Cookie': f'token={token}'}
     response = requests.post(
@@ -458,6 +466,7 @@ def test_case_12():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert response.json()['error']['message'] == "Параметр 'lon' является обязательным"
 
 # Тест-кейс 13: Попытка создания избранного места с пустым title
 def test_case_13():
@@ -474,12 +483,13 @@ def test_case_13():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert response.json()['error']['message'] == "Параметр 'title' не может быть пустым"
 
 # Тест-кейс 14: Попытка создания избранного места с недопустимым цветом
 def test_case_14():
     token = get_session_token()
     data = {
-        "title": "",
+        "title": "Недопустимый цвет",
         "lat": 43.77925,
         "lon": 11.24626,
         "color": "INVALID_COLOR"
@@ -491,6 +501,7 @@ def test_case_14():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert response.json()['error']['message'] == "Параметр 'color' может быть одним из следующих значений: BLUE, GREEN, RED, YELLOW"
 
 # Тест-кейс 15: Попытка создания избранного места с title длиной 1000 символов
 def test_case_15():
@@ -499,8 +510,7 @@ def test_case_15():
     data = {
         "title": string_1000,
         "lat": 43.77925,
-        "lon": 11.24626,
-        "color": "INVALID_COLOR"
+        "lon": 11.24626
     }
     headers = {'Cookie': f'token={token}'}
     response = requests.post(
@@ -508,21 +518,26 @@ def test_case_15():
         data=data,
         headers=headers
     )
+
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert 'error' in response.json()
+
 
 # Тест-кейс 16: Попытка получения сессионного токена при отправке непустого тела запроса
 def test_case_16():
     data = {"test":"test"}
     response = requests.post('https://regions-test.2gis.com/v1/auth/tokens',data=data)
     token = response.cookies.get('token')
+
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
 
-# Тест-кейс 17: Попытка создания избранного места с lat и/или lon заполнеными некорректными типами данных
+
+# Тест-кейс 17: Попытка создания избранного места с lat и/или lon заполнеными некорректными типами данных (передаем не float, а float в виде строки)
 def test_case_17():
     token = get_session_token()
 
     data = {
-        "title": "Тестовое место",
+        "title": "Некорректные типы данных 1",
         "lat": "41.89193",
         "lon": "12.51133"
     }
@@ -532,4 +547,25 @@ def test_case_17():
         data=data,
         headers=headers
     )
+    print(response.json())
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert 'error' in response.json()
+
+# Тест-кейс 18: Попытка создания избранного места с lat и/или lon заполненными некорректными типами данных (передаем строки)
+def test_case_18():
+    token = get_session_token()
+
+    data = {
+        "title": "Некорректные типы данных 2",
+        "lat": "41.89193",
+        "lon": "двадцать три"
+    }
+    headers = {'Cookie': f'token={token}'}
+    response = requests.post(
+        'https://regions-test.2gis.com/v1/favorites',
+        data=data,
+        headers=headers
+    )
+    print(response.json())
+    assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
+    assert response.json()['error']['message'] == "Параметр 'lon' должен быть числом"

@@ -1,3 +1,4 @@
+import pytest
 import requests
 import time
 
@@ -61,15 +62,15 @@ def test_case_1():
     assert len(tz_part) == 2, f"Неверный формат часового пояса: {tz_part}"
     assert all(part.isdigit() for part in tz_part), f"Часовой пояс доджен содержать только цифры: {tz_part}"
 
-
+@pytest.mark.parametrize('colors', ['BLUE', 'GREEN', 'RED', 'YELLOW'])
 # Тест-кейс 2: Создание избранного места с указанием всех допустимых цветов (по очереди)
-def test_case_2():
+def test_case_2(colors):
     token = get_session_token()
     data = {
         "title": "Место с цветом",
         "lat": 45.46427,
         "lon": 9.18951,
-        "color": "YELLOW"
+        "color": colors
     }
     headers = {'Cookie': f'token={token}'}
     response = requests.post(

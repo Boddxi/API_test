@@ -539,9 +539,6 @@ def test_case_16():
     data = {"test": "test"}
     response = requests.post('https://regions-test.2gis.com/v1/auth/tokens', data=data)
     token = response.cookies.get('token')
-    print(f"Полученный токен: {token}")
-    print(f"Статус код: {response.status_code}")
-    print(f"Заголовки ответа: {dict(response.headers)}")
 
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
     assert token is None, f"Токен не должен выдаваться, но получен: {token}"

@@ -475,7 +475,7 @@ def test_case_12():
         headers=headers
     )
     assert response.status_code == 400, f"Ожидался статус 400, но получили {response.status_code}"
-    assert response.json()['error']['message'] == "Параметры 'lat' и 'lon' является обязательными"
+    assert response.json()['error']['message'] == "Параметры 'lat' и 'lon' являются обязательными"
 
 
 # Тест-кейс 13: Попытка создания избранного места с пустым title

@@ -1,3 +1,4 @@
+import logging
 import pytest
 import requests
 import time
@@ -24,6 +25,12 @@ def test_case_1():
         data=data,
         headers=headers
     )
+
+    logging.info(response.json())
+    logging.info(response.request.url)
+    logging.info(response.status_code)
+    logging.info(response.headers)
+
     assert response.status_code == 200, f"Ожидался статус 200, но получили {response.status_code}"
 
     response_data = response.json()
